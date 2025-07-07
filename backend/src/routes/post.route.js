@@ -13,4 +13,4 @@ router.post('/create', protectRoute, upload.single('image'), createPost);
 router.post('/:postId/like', protectRoute, likePost);
 router.delete('/:postId', protectRoute, deletePost);
 
-export default router;x
+export default router;
