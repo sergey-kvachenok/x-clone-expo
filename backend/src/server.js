@@ -17,6 +17,12 @@ app.get('/', (req, res) => {
 })
 
 app.use('/api/users', userRoutes);
+app.use('/api/posts', postRoutes);
+
+app.use((err, req, res) =>
+{
+  res.status(500).json({ message: err.message || 'Internal server error' });
+})
 
 const startServer = async () => {
   try {
