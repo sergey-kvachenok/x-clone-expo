@@ -1,9 +1,10 @@
 
+import { useSocialAuth } from "@/hooks/useSocialAuth";
 import {  Text, View, Image, TouchableOpacity, ActivityIndicator } from "react-native";
 
 export default function Index()
 {
-  const isLoading = false
+  const { isLoading, handleSocialAuth}  = useSocialAuth()
 
   return (
     <View className="flex-1 bg-white">
@@ -15,7 +16,10 @@ export default function Index()
 
           <View className="flex flex-col gap-3">
             <TouchableOpacity
-              onPress={() => { }}
+              onPress={() =>
+              {
+                handleSocialAuth("oauth_google")
+               }}
               disabled={isLoading}
               className="flex flex-row justify-center items-center gap-3 border border-gray-300 rounded-full h-12 disabled:border-gray-100"
               style={{
@@ -36,7 +40,10 @@ export default function Index()
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={() => { }}
+               onPress={() =>
+              {
+                handleSocialAuth("oauth_apple")
+               }}
               disabled={isLoading}
               className="flex flex-row justify-center items-center gap-3 border border-gray-300 rounded-full py-2 h-12 disabled:border-gray-100"
               style={{
