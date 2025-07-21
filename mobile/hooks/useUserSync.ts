@@ -8,7 +8,6 @@ export const useUserSync = () => {
   const { isSignedIn } = useClerk()
   const api = useApiClient()
   
-
   const syncUserMutation = useMutation({
     mutationFn: () => userApi.syncUser(api),
     onSuccess: (response: any) => {

@@ -3,9 +3,7 @@ import { ENV } from './env.js'
 
 export const aj = arcjet({
   key: ENV.ARCJET_KEY,
-  characteristics: {
-    ip: ["ip.src"]
-  },
+  characteristics: ["ip.src"],
 
    rules: [
     shield({
