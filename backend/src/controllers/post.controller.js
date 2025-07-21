@@ -75,17 +75,13 @@ export const createPost = asyncHandler(async (req, res) =>
   const { content } = req.body;
   const imageFile = req.file;
 
-     console.log('HERE', req.body, userId)
-
   if (!imageFile && !content)
   {
-    console.log('HERE 1', {imageFile, content})
     return res.status(400).json({ message: 'Post content or image is required' });
   }
 
-     console.log('HERE', {content, imageFile})
   const user = await User.findOne({ clerkId: userId });
-   console.log('HERE', {user})
+
   if (!user) {
     return res.status(404).json({ message: 'User not found' });
   }
