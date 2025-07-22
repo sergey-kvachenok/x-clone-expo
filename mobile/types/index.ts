@@ -23,6 +23,24 @@ export interface Post {
   comments: Comment[];
 }
 
+// API Response types
+export interface ApiResponse<T> {
+  data: T;
+  status: number;
+  statusText?: string;
+  headers: Record<string, string>;
+  config: Record<string, unknown>;
+  request?: unknown;
+}
+
+export interface PostsResponse {
+  posts: Post[];
+}
+
+export interface CommentResponse {
+  comment: Comment;
+}
+
 export interface Notification {
   _id: string;
   from: {

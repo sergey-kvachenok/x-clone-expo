@@ -1,9 +1,10 @@
 import { View, Text, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native'
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useCurrentUser } from '@/hooks/useCurrentUser'
 import { usePosts } from '@/hooks/usePosts'
 import PostCard from './PostCard'
 import { Post } from '@/types'
+import CommentsModal from './CommentsModal'
 
 
 const PostsList = () => {
@@ -11,7 +12,12 @@ const PostsList = () => {
   const { posts, isLoading, error, refetch, toggleLike, deletePost, checkIsLiked } =
     usePosts(currentUser);
   
-  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [selectedPostId, setSelectedPostId] = useState<string>('');
+
+  const selectedPost = useMemo(() =>
+  {
+    return posts.find((post: Post) => post._id === selectedPostId)
+  }, [selectedPostId, posts])
 
   if (isLoading) {
     return (
@@ -59,11 +65,13 @@ const PostsList = () => {
           post={post}
           onLike={toggleLike}
           onDelete={deletePost}
-          onComment={(post: Post) => setSelectedPost(post)}
+          onComment={(post: Post) => setSelectedPostId(post._id)}
           currentUser={currentUser}
           isLiked={checkIsLiked(post.likes, currentUser)}
         />
       ))}
+
+        {selectedPost && <CommentsModal selectedPost={selectedPost} onClose={() => setSelectedPostId('')} />}
     </>
   )
 }

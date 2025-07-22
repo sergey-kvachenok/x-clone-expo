@@ -1,6 +1,7 @@
 import { postApi, useApiClient } from "@/utils/api"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Post, User } from "@/types"
+import { Post, User, ApiResponse, PostsResponse } from "@/types"
+import { togglePostLike } from "@/utils/cacheUtils"
 
 export const usePosts = (currentUser?: User) => {
   const api = useApiClient()
@@ -12,7 +13,12 @@ export const usePosts = (currentUser?: User) => {
     select: (response) => response.data.posts,
   })
 
-  const { mutate: likePostMutation } = useMutation({
+  const { mutate: likePostMutation } = useMutation<
+    unknown, 
+    Error, 
+    string, 
+    { previousResponse?: ApiResponse<PostsResponse> }
+  >({
     mutationFn: (postId: string) => postApi.likePost(api, postId),
     
     // Optimistic update
@@ -25,32 +31,16 @@ export const usePosts = (currentUser?: User) => {
       await queryClient.cancelQueries({ queryKey: ["posts"] })
 
       // Snapshot the previous value - it's the full Axios response
-      const previousResponse = queryClient.getQueryData(["posts"]) as any
+      const previousResponse = queryClient.getQueryData<ApiResponse<PostsResponse>>(["posts"])
 
-      // Optimistically update to the new value
-      queryClient.setQueryData(["posts"], (oldResponse: any) => {
-        if (!oldResponse?.data?.posts) {
-          return oldResponse
-        }
+      // Optimistically update (can't use utility due to different data structure)
+      queryClient.setQueryData<ApiResponse<PostsResponse>>(["posts"], (oldResponse) => {
+        if (!oldResponse?.data?.posts) return oldResponse
+        
+        const updatedPosts = oldResponse.data.posts.map((post: Post) => 
+          post._id === postId ? togglePostLike(post, currentUser._id) : post
+        )
 
-        const oldPosts = oldResponse.data.posts as Post[]
-
-        const updatedPosts = oldPosts.map(post => {
-          if (post._id === postId) {
-            const currentUserId = currentUser._id
-            const isCurrentlyLiked = post.likes.includes(currentUserId)
-            
-            return {
-              ...post,
-              likes: isCurrentlyLiked 
-                ? post.likes.filter((id: string) => id !== currentUserId) // Unlike
-                : [...post.likes, currentUserId] // Like
-            }
-          }
-          return post
-        })
-
-        // Return the full response structure with updated posts
         return {
           ...oldResponse,
           data: {
@@ -58,19 +48,19 @@ export const usePosts = (currentUser?: User) => {
             posts: updatedPosts
           }
         }
-      })
+      });
 
       // Return a context object with the snapshotted value
       return { previousResponse }
     },
 
-    onError: (err, postId, context) => {
+    onError: (err: Error, postId: string, context) => {
       if (context?.previousResponse) {
         queryClient.setQueryData(["posts"], context.previousResponse)
       }
     },
 
-    onSuccess: (data, postId) => {
+    onSuccess: (data: unknown, postId: string) => {
       // Success - data is already optimistically updated
     },
 
@@ -80,7 +70,15 @@ export const usePosts = (currentUser?: User) => {
     }
   })
 
-  const deletePostMutation = useMutation({
+  const deletePostMutation = useMutation<
+    unknown,
+    Error,
+    string,
+    { 
+      previousPostsResponse?: ApiResponse<PostsResponse>;
+      previousUserPostsResponse?: ApiResponse<PostsResponse>;
+    }
+  >({
     mutationFn: (postId: string) => postApi.deletePost(api, postId),
     
     // Optimistic update for delete
@@ -90,11 +88,11 @@ export const usePosts = (currentUser?: User) => {
       await queryClient.cancelQueries({ queryKey: ["userPosts"] })
 
       // Snapshot the previous values
-      const previousPostsResponse = queryClient.getQueryData(["posts"]) as any
-      const previousUserPostsResponse = queryClient.getQueryData(["userPosts"]) as any
+      const previousPostsResponse = queryClient.getQueryData<ApiResponse<PostsResponse>>(["posts"])
+      const previousUserPostsResponse = queryClient.getQueryData<ApiResponse<PostsResponse>>(["userPosts"])
 
       // Optimistically remove the post from both caches
-      queryClient.setQueryData(["posts"], (oldResponse: any) => {
+      queryClient.setQueryData<ApiResponse<PostsResponse>>(["posts"], (oldResponse) => {
         if (!oldResponse?.data?.posts) return oldResponse
         
         return {
@@ -107,7 +105,7 @@ export const usePosts = (currentUser?: User) => {
       })
 
       // Also update userPosts cache if it exists
-      queryClient.setQueryData(["userPosts"], (oldResponse: any) => {
+      queryClient.setQueryData<ApiResponse<PostsResponse>>(["userPosts"], (oldResponse) => {
         if (!oldResponse?.data?.posts) return oldResponse
         
         return {
@@ -122,7 +120,7 @@ export const usePosts = (currentUser?: User) => {
       return { previousPostsResponse, previousUserPostsResponse }
     },
 
-    onError: (err, postId, context) => {
+    onError: (err: Error, postId: string, context) => {
       // Rollback on error
       if (context?.previousPostsResponse) {
         queryClient.setQueryData(["posts"], context.previousPostsResponse)
@@ -138,12 +136,11 @@ export const usePosts = (currentUser?: User) => {
     }
   })
   
-  const checkIsLiked = (postLikes: string[], currentUser: any) => {
-    const isLiked = currentUser && postLikes.includes(currentUser._id);
-    return isLiked;
+  const checkIsLiked = (postLikes: string[], currentUser: User | undefined): boolean => {
+    return Boolean(currentUser && postLikes.includes(currentUser._id));
   };
 
-  const toggleLike = (postId: string) => {
+  const toggleLike = (postId: string): void => {
     likePostMutation(postId)
   }
 
