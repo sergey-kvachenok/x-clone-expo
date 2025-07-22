@@ -82,10 +82,60 @@ export const usePosts = (currentUser?: User) => {
 
   const deletePostMutation = useMutation({
     mutationFn: (postId: string) => postApi.deletePost(api, postId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
-      queryClient.invalidateQueries({ queryKey: ["userPosts"] });
+    
+    // Optimistic update for delete
+    onMutate: async (postId: string) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["posts"] })
+      await queryClient.cancelQueries({ queryKey: ["userPosts"] })
+
+      // Snapshot the previous values
+      const previousPostsResponse = queryClient.getQueryData(["posts"]) as any
+      const previousUserPostsResponse = queryClient.getQueryData(["userPosts"]) as any
+
+      // Optimistically remove the post from both caches
+      queryClient.setQueryData(["posts"], (oldResponse: any) => {
+        if (!oldResponse?.data?.posts) return oldResponse
+        
+        return {
+          ...oldResponse,
+          data: {
+            ...oldResponse.data,
+            posts: oldResponse.data.posts.filter((post: Post) => post._id !== postId)
+          }
+        }
+      })
+
+      // Also update userPosts cache if it exists
+      queryClient.setQueryData(["userPosts"], (oldResponse: any) => {
+        if (!oldResponse?.data?.posts) return oldResponse
+        
+        return {
+          ...oldResponse,
+          data: {
+            ...oldResponse.data,
+            posts: oldResponse.data.posts.filter((post: Post) => post._id !== postId)
+          }
+        }
+      })
+
+      return { previousPostsResponse, previousUserPostsResponse }
     },
+
+    onError: (err, postId, context) => {
+      // Rollback on error
+      if (context?.previousPostsResponse) {
+        queryClient.setQueryData(["posts"], context.previousPostsResponse)
+      }
+      if (context?.previousUserPostsResponse) {
+        queryClient.setQueryData(["userPosts"], context.previousUserPostsResponse)
+      }
+    },
+
+    onSuccess: () => {
+      // No need to invalidate - optimistic update is already applied
+      // Only refetch if we want to ensure data consistency (optional)
+    }
   })
   
   const checkIsLiked = (postLikes: string[], currentUser: any) => {
