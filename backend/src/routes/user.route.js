@@ -8,7 +8,7 @@ router.get('/profile/:username', getUserProfile);
 
 router.post('/sync', protectRoute, syncUser);
 
-router.post('/me', protectRoute, getCurrentUser);
+router.get('/me', protectRoute, getCurrentUser);
 
 router.patch('/profile', protectRoute, updateUserProfile);
 

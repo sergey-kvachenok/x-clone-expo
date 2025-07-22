@@ -57,10 +57,6 @@ export const useCreatePost = () =>
     },
     onError: (err: any) =>
     {
-      console.log('Full error:', err)
-      console.log('Error response:', err.response?.data)
-      console.log('Error status:', err.response?.status)
-      console.log('Error config:', err.config?.url)
       Alert.alert("Error", "Failed to create post. Please try again.");
     }
   })

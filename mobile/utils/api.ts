@@ -1,8 +1,8 @@
 import { useAuth } from '@clerk/clerk-expo'
 import axios, { AxiosInstance } from 'axios'
 
-const API_URL = 'https://x-clone-expo.vercel.app/api'
-  // 'http://192.168.0.165:5001/api'
+// const API_URL = 'https://x-clone-expo.vercel.app/api'
+const API_URL =  'http://192.168.0.165:5001/api'
 
 
 // Создание API клиента с токеном
@@ -35,6 +35,21 @@ export const userApi = {
   getCurrentUser: (api: AxiosInstance) => api.get('/users/me'),
   updateProfile: (api: AxiosInstance, userData: any) => api.put('/users/profile', userData),
 }
+
+export const postApi = {
+  createPost: (api: AxiosInstance, data: { content: string; image?: string }) =>
+    api.post("/posts/create", data),
+  getPosts: (api: AxiosInstance) => api.get("/posts"),
+  getUserPosts: (api: AxiosInstance, username: string) => api.get(`/posts/user/${username}`),
+  likePost: (api: AxiosInstance, postId: string) => api.post(`/posts/${postId}/like`),
+  deletePost: (api: AxiosInstance, postId: string) => api.delete(`/posts/${postId}`),
+};
+
+export const commentApi = {
+  createComment: (api: AxiosInstance, postId: string, content: string) =>
+    api.post(`/comments/post/${postId}`, { content }),
+};
+
 
 // // Функция для получения токена в любом месте приложения
 // export const getAuthToken = async (): Promise<string | null> => {
