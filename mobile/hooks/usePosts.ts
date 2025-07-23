@@ -12,6 +12,7 @@ export const usePosts = (currentUser?: User) => {
     isLoading,
     error,
     refetch,
+    isRefetching,
   } = useQuery({
     queryKey: ['posts'],
     queryFn: () => postApi.getPosts(api),
@@ -60,6 +61,7 @@ export const usePosts = (currentUser?: User) => {
     },
 
     onError: (err: Error, postId: string, context) => {
+      console.log({ error })
       if (context?.previousResponse) {
         queryClient.setQueryData(['posts'], context.previousResponse)
       }
@@ -154,6 +156,7 @@ export const usePosts = (currentUser?: User) => {
   return {
     posts: postsData || [],
     isLoading,
+    isRefetching,
     error,
     refetch,
     toggleLike,

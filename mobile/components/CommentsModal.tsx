@@ -1,6 +1,6 @@
 import { useComments } from '@/hooks/useComments'
 import { useCurrentUser } from '@/hooks/useCurrentUser'
-import { Post} from '@/types'
+import { Post } from '@/types'
 import {
   View,
   Text,
@@ -73,26 +73,20 @@ const CommentsModal = ({ selectedPost, onClose }: CommentsModalProps) => {
           </View>
 
           {/* COMMENTS LIST */}
-          {selectedPost.comments.map(comment =>
-          {
-            const { _id, user, content } = comment || {};
-            const { profilePicture, firstName='', lastName='', username } = user || {};
-            const fullName = `${firstName} ${lastName}`;
-
-
+          {(selectedPost.comments ?? []).map(comment => {
+            const { _id, user, content } = comment || {}
+            const { profilePicture, firstName = '', lastName = '', username } = user || {}
+            const fullName = `${firstName} ${lastName}`
             return (
               <View key={_id} className="border-b border-gray-100 bg-white p-4">
                 <View className="flex-row">
-                  <Image
-                    source={{ uri: profilePicture }}
-                    className="mr-3 h-10 w-10 rounded-full"
-                  />
+                  <Image source={{ uri: profilePicture }} className="mr-3 h-10 w-10 rounded-full" />
 
                   <View className="flex-1">
-                    <View className="flex-row items-center gap-2 mb-1">
-                      {fullName.trim() && <Text className="mr-1 font-bold text-gray-900">
-                        {fullName}
-                      </Text>}
+                    <View className="mb-1 flex-row items-center gap-2">
+                      {fullName.trim() && (
+                        <Text className="mr-1 font-bold text-gray-900">{fullName}</Text>
+                      )}
                       <Text className="text-sm text-gray-500">@{username}</Text>
                     </View>
 
@@ -101,55 +95,49 @@ const CommentsModal = ({ selectedPost, onClose }: CommentsModalProps) => {
                 </View>
               </View>
             )
-          }
-          )}
-          
-
-       
+          })}
         </ScrollView>
       )}
 
-         {/* ADD COMMENT INPUT */}
-          <View className="border-t border-gray-100 p-4">
-            <View className="flex-row">
-              <Image
-                source={{ uri: currentUser?.profilePicture }}
-                className="mr-3 size-10 rounded-full"
-              />
+      {/* ADD COMMENT INPUT */}
+      <View className="border-t border-gray-100 p-4">
+        <View className="flex-row">
+          <Image
+            source={{ uri: currentUser?.profilePicture }}
+            className="mr-3 size-10 rounded-full"
+          />
 
-              <View className="flex-1 pb-2">
-                <TextInput
-                  className="mb-3 rounded-lg border border-gray-200 p-3 text-base"
-                  placeholder="Write a comment..."
-                  value={commentText}
-                  onChangeText={setCommentText}
-                  multiline
-                  numberOfLines={3}
-                  textAlignVertical="top"
-                />
+          <View className="flex-1 pb-2">
+            <TextInput
+              className="mb-3 rounded-lg border border-gray-200 p-3 text-base"
+              placeholder="Write a comment..."
+              value={commentText}
+              onChangeText={setCommentText}
+              multiline
+              numberOfLines={3}
+              textAlignVertical="top"
+            />
 
-                <TouchableOpacity
-                  className={`self-end rounded-lg px-4 py-2 ${
-                    commentText.trim() ? 'bg-blue-500' : 'bg-gray-300'
-                  }`}
-                  onPress={() => createComment(selectedPost._id)}
-                  disabled={isCreatingComment || !commentText.trim()}
+            <TouchableOpacity
+              className={`self-end rounded-lg px-4 py-2 ${
+                commentText.trim() ? 'bg-blue-500' : 'bg-gray-300'
+              }`}
+              onPress={() => createComment(selectedPost._id)}
+              disabled={isCreatingComment || !commentText.trim()}
+            >
+              {isCreatingComment ? (
+                <ActivityIndicator size={'small'} color={'white'} />
+              ) : (
+                <Text
+                  className={`font-semibold ${commentText.trim() ? 'text-white' : 'text-gray-500'}`}
                 >
-                  {isCreatingComment ? (
-                    <ActivityIndicator size={'small'} color={'white'} />
-                  ) : (
-                    <Text
-                      className={`font-semibold ${
-                        commentText.trim() ? 'text-white' : 'text-gray-500'
-                      }`}
-                    >
-                      Reply
-                    </Text>
-                  )}
-                </TouchableOpacity>
-              </View>
-            </View>
+                  Reply
+                </Text>
+              )}
+            </TouchableOpacity>
           </View>
+        </View>
+      </View>
     </Modal>
   )
 }

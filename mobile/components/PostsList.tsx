@@ -1,4 +1,11 @@
-import { View, Text, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native'
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  TouchableOpacity,
+  FlatList,
+  RefreshControl,
+} from 'react-native'
 import React, { useMemo, useState } from 'react'
 import { useCurrentUser } from '@/hooks/useCurrentUser'
 import { usePosts } from '@/hooks/usePosts'
@@ -8,7 +15,7 @@ import CommentsModal from './CommentsModal'
 
 const PostsList = () => {
   const { currentUser } = useCurrentUser()
-  const { posts, isLoading, error, refetch, toggleLike, deletePost, checkIsLiked } =
+  const { posts, isLoading, error, refetch, toggleLike, deletePost, checkIsLiked, isRefetching } =
     usePosts(currentUser)
 
   const [selectedPostId, setSelectedPostId] = useState<string>('')
@@ -55,19 +62,28 @@ const PostsList = () => {
     )
   }
 
+  const renderItem = ({ item }: { item: Post }) => (
+    <PostCard
+      post={item}
+      onLike={toggleLike}
+      onDelete={deletePost}
+      onComment={(post: Post) => setSelectedPostId(post._id)}
+      currentUser={currentUser}
+      isLiked={checkIsLiked(item.likes, currentUser)}
+    />
+  )
+
   return (
     <>
-      {posts.map((post: Post) => (
-        <PostCard
-          key={post._id}
-          post={post}
-          onLike={toggleLike}
-          onDelete={deletePost}
-          onComment={(post: Post) => setSelectedPostId(post._id)}
-          currentUser={currentUser}
-          isLiked={checkIsLiked(post.likes, currentUser)}
-        />
-      ))}
+      <FlatList
+        data={posts}
+        renderItem={renderItem}
+        keyExtractor={item => item._id}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={'#1DA1F2'} />
+        }
+      />
 
       {selectedPost && (
         <CommentsModal selectedPost={selectedPost} onClose={() => setSelectedPostId('')} />
