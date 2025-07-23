@@ -6,57 +6,55 @@ import PostCard from './PostCard'
 import { Post } from '@/types'
 import CommentsModal from './CommentsModal'
 
-
 const PostsList = () => {
   const { currentUser } = useCurrentUser()
   const { posts, isLoading, error, refetch, toggleLike, deletePost, checkIsLiked } =
-    usePosts(currentUser);
-  
-  const [selectedPostId, setSelectedPostId] = useState<string>('');
+    usePosts(currentUser)
 
-  const selectedPost = useMemo(() =>
-  {
+  const [selectedPostId, setSelectedPostId] = useState<string>('')
+
+  const selectedPost = useMemo(() => {
     return posts.find((post: Post) => post._id === selectedPostId)
   }, [selectedPostId, posts])
 
   if (isLoading) {
     return (
-      <View className="p-8 items-center">
+      <View className="items-center p-8">
         <ActivityIndicator size="large" color="#1DA1F2" />
-        <Text className="text-gray-500 mt-2">Loading posts...</Text>
+        <Text className="mt-2 text-gray-500">Loading posts...</Text>
       </View>
-    );
+    )
   }
 
   if (error) {
     return (
-      <View className="p-8 items-center">
-        <Text className="text-gray-500 mb-4">Failed to load posts</Text>
-        <TouchableOpacity className="bg-blue-500 px-4 py-2 rounded-lg" onPress={() => refetch()}>
-          <Text className="text-white font-semibold">Retry</Text>
+      <View className="items-center p-8">
+        <Text className="mb-4 text-gray-500">Failed to load posts</Text>
+        <TouchableOpacity className="rounded-lg bg-blue-500 px-4 py-2" onPress={() => refetch()}>
+          <Text className="font-semibold text-white">Retry</Text>
         </TouchableOpacity>
       </View>
-    );
+    )
   }
 
   if (posts.length === 0) {
     return (
-      <View className="p-8 items-center">
+      <View className="items-center p-8">
         <Text className="text-gray-500">No posts yet</Text>
       </View>
-    );
+    )
   }
 
   // Don't render if currentUser is not loaded yet
   if (!currentUser) {
     return (
-      <View className="p-8 items-center">
+      <View className="items-center p-8">
         <ActivityIndicator size="large" color="#1DA1F2" />
-        <Text className="text-gray-500 mt-2">Loading user...</Text>
+        <Text className="mt-2 text-gray-500">Loading user...</Text>
       </View>
-    );
+    )
   }
-  
+
   return (
     <>
       {posts.map((post: Post) => (
@@ -71,7 +69,9 @@ const PostsList = () => {
         />
       ))}
 
-        {selectedPost && <CommentsModal selectedPost={selectedPost} onClose={() => setSelectedPostId('')} />}
+      {selectedPost && (
+        <CommentsModal selectedPost={selectedPost} onClose={() => setSelectedPostId('')} />
+      )}
     </>
   )
 }

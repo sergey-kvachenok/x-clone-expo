@@ -1,8 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
-import { useApiClient, userApi } from "../utils/api";
+import { useQuery } from '@tanstack/react-query'
+import { useApiClient, userApi } from '../utils/api'
 
 export const useCurrentUser = () => {
-  const api = useApiClient();
+  const api = useApiClient()
 
   const {
     data: currentUser,
@@ -10,10 +10,10 @@ export const useCurrentUser = () => {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["authUser"],
+    queryKey: ['authUser'],
     queryFn: () => userApi.getCurrentUser(api),
-    select: (response) => response.data.user,
-  });
+    select: response => response.data.user,
+  })
 
-  return { currentUser, isLoading, error, refetch };
-};
+  return { currentUser, isLoading, error, refetch }
+}

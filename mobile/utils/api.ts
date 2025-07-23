@@ -2,8 +2,7 @@ import { useAuth } from '@clerk/clerk-expo'
 import axios, { AxiosInstance } from 'axios'
 
 // const API_URL = 'https://x-clone-expo.vercel.app/api'
-const API_URL =  'http://192.168.0.165:5001/api'
-
+const API_URL = 'http://192.168.0.165:5001/api'
 
 // Создание API клиента с токеном
 const createApiClient = (getToken: () => Promise<string | null>): AxiosInstance => {
@@ -38,18 +37,17 @@ export const userApi = {
 
 export const postApi = {
   createPost: (api: AxiosInstance, data: { content: string; image?: string }) =>
-    api.post("/posts/create", data),
-  getPosts: (api: AxiosInstance) => api.get("/posts"),
+    api.post('/posts/create', data),
+  getPosts: (api: AxiosInstance) => api.get('/posts'),
   getUserPosts: (api: AxiosInstance, username: string) => api.get(`/posts/user/${username}`),
   likePost: (api: AxiosInstance, postId: string) => api.post(`/posts/${postId}/like`),
   deletePost: (api: AxiosInstance, postId: string) => api.delete(`/posts/${postId}`),
-};
+}
 
 export const commentApi = {
   createComment: (api: AxiosInstance, postId: string, content: string) =>
     api.post(`/comments/post/${postId}`, { content }),
-};
-
+}
 
 // // Функция для получения токена в любом месте приложения
 // export const getAuthToken = async (): Promise<string | null> => {
@@ -57,11 +55,11 @@ export const commentApi = {
 //     // Динамически импортируем Clerk чтобы избежать проблем с SSR
 //     const { getClerkInstance } = await import('@clerk/clerk-expo')
 //     const clerk =  getClerkInstance()
-    
+
 //     if (clerk?.session) {
 //       return await clerk.session.getToken()
 //     }
-    
+
 //     return null
 //   } catch (error) {
 //     console.error('Error getting auth token:', error)

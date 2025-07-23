@@ -1,7 +1,7 @@
-import { useComments } from "@/hooks/useComments";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { Post, Comment } from "@/types";
-import { useMemo } from "react";
+import { useComments } from '@/hooks/useComments'
+import { useCurrentUser } from '@/hooks/useCurrentUser'
+import { Post, Comment } from '@/types'
+import { useMemo } from 'react'
 import {
   View,
   Text,
@@ -11,29 +11,28 @@ import {
   Image,
   TextInput,
   ActivityIndicator,
-} from "react-native";
+} from 'react-native'
 
 interface CommentsModalProps {
-  selectedPost: Post;
-  onClose: () => void;
+  selectedPost: Post
+  onClose: () => void
 }
 
 const CommentsModal = ({ selectedPost, onClose }: CommentsModalProps) => {
-  const { commentText, setCommentText, createComment, isCreatingComment,  } = useComments();
-  const { currentUser } = useCurrentUser();
-
+  const { commentText, setCommentText, createComment, isCreatingComment } = useComments()
+  const { currentUser } = useCurrentUser()
 
   const handleClose = () => {
-    onClose();
-    setCommentText("");
-  };
+    onClose()
+    setCommentText('')
+  }
 
   return (
     <Modal visible={!!selectedPost} animationType="slide" presentationStyle="pageSheet">
       {/* MODAL HEADER */}
-      <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-100">
+      <View className="flex-row items-center justify-between border-b border-gray-100 px-4 py-3">
         <TouchableOpacity onPress={handleClose}>
-          <Text className="text-blue-500 text-lg">Close</Text>
+          <Text className="text-lg text-blue-500">Close</Text>
         </TouchableOpacity>
         <Text className="text-lg font-semibold">Comments</Text>
         <View className="w-12" />
@@ -46,19 +45,19 @@ const CommentsModal = ({ selectedPost, onClose }: CommentsModalProps) => {
             <View className="flex-row">
               <Image
                 source={{ uri: selectedPost.user.profilePicture }}
-                className="size-12 rounded-full mr-3"
+                className="mr-3 size-12 rounded-full"
               />
 
               <View className="flex-1">
-                <View className="flex-row items-center mb-1">
-                  <Text className="font-bold text-gray-900 mr-1">
+                <View className="mb-1 flex-row items-center">
+                  <Text className="mr-1 font-bold text-gray-900">
                     {selectedPost.user.firstName} {selectedPost.user.lastName}
                   </Text>
-                  <Text className="text-gray-500 ml-1">@{selectedPost.user.username}</Text>
+                  <Text className="ml-1 text-gray-500">@{selectedPost.user.username}</Text>
                 </View>
 
                 {selectedPost.content && (
-                  <Text className="text-gray-900 text-base leading-5 mb-3">
+                  <Text className="mb-3 text-base leading-5 text-gray-900">
                     {selectedPost.content}
                   </Text>
                 )}
@@ -66,7 +65,7 @@ const CommentsModal = ({ selectedPost, onClose }: CommentsModalProps) => {
                 {selectedPost.image && (
                   <Image
                     source={{ uri: selectedPost.image }}
-                    className="w-full h-48 rounded-2xl mb-3"
+                    className="mb-3 h-48 w-full rounded-2xl"
                     resizeMode="cover"
                   />
                 )}
@@ -75,23 +74,23 @@ const CommentsModal = ({ selectedPost, onClose }: CommentsModalProps) => {
           </View>
 
           {/* COMMENTS LIST */}
-          {selectedPost.comments.map((comment) => (
+          {selectedPost.comments.map(comment => (
             <View key={comment._id} className="border-b border-gray-100 bg-white p-4">
               <View className="flex-row">
                 <Image
                   source={{ uri: comment.user.profilePicture }}
-                  className="w-10 h-10 rounded-full mr-3"
+                  className="mr-3 h-10 w-10 rounded-full"
                 />
 
                 <View className="flex-1">
-                  <View className="flex-row items-center mb-1">
-                    <Text className="font-bold text-gray-900 mr-1">
+                  <View className="mb-1 flex-row items-center">
+                    <Text className="mr-1 font-bold text-gray-900">
                       {comment.user.firstName} {comment.user.lastName}
                     </Text>
-                    <Text className="text-gray-500 text-sm ml-1">@{comment.user.username}</Text>
+                    <Text className="ml-1 text-sm text-gray-500">@{comment.user.username}</Text>
                   </View>
 
-                  <Text className="text-gray-900 text-base leading-5 mb-2">{comment.content}</Text>
+                  <Text className="mb-2 text-base leading-5 text-gray-900">{comment.content}</Text>
                 </View>
               </View>
             </View>
@@ -99,16 +98,16 @@ const CommentsModal = ({ selectedPost, onClose }: CommentsModalProps) => {
 
           {/* ADD COMMENT INPUT */}
 
-          <View className="p-4 border-t border-gray-100">
+          <View className="border-t border-gray-100 p-4">
             <View className="flex-row">
               <Image
                 source={{ uri: currentUser?.profilePicture }}
-                className="size-10 rounded-full mr-3"
+                className="mr-3 size-10 rounded-full"
               />
 
               <View className="flex-1">
                 <TextInput
-                  className="border border-gray-200 rounded-lg p-3 text-base mb-3"
+                  className="mb-3 rounded-lg border border-gray-200 p-3 text-base"
                   placeholder="Write a comment..."
                   value={commentText}
                   onChangeText={setCommentText}
@@ -118,18 +117,18 @@ const CommentsModal = ({ selectedPost, onClose }: CommentsModalProps) => {
                 />
 
                 <TouchableOpacity
-                  className={`px-4 py-2 rounded-lg self-start ${
-                    commentText.trim() ? "bg-blue-500" : "bg-gray-300"
+                  className={`self-start rounded-lg px-4 py-2 ${
+                    commentText.trim() ? 'bg-blue-500' : 'bg-gray-300'
                   }`}
                   onPress={() => createComment(selectedPost._id)}
                   disabled={isCreatingComment || !commentText.trim()}
                 >
                   {isCreatingComment ? (
-                    <ActivityIndicator size={"small"} color={"white"} />
+                    <ActivityIndicator size={'small'} color={'white'} />
                   ) : (
                     <Text
                       className={`font-semibold ${
-                        commentText.trim() ? "text-white" : "text-gray-500"
+                        commentText.trim() ? 'text-white' : 'text-gray-500'
                       }`}
                     >
                       Reply
@@ -142,7 +141,7 @@ const CommentsModal = ({ selectedPost, onClose }: CommentsModalProps) => {
         </ScrollView>
       )}
     </Modal>
-  );
-};
+  )
+}
 
-export default CommentsModal;
+export default CommentsModal
