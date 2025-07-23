@@ -40,6 +40,8 @@ export const syncUser = asyncHandler(async (req, res) =>
 
   const clerkUser = await clerkClient.users.getUser(userId);
 
+  console.log({clerkUser})
+
   const userData = {
     clerkId: userId,
     email: clerkUser.emailAddresses[0].emailAddress,

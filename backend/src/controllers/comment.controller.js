@@ -19,9 +19,11 @@ export const getComments = expressAsyncHandler(async (req, res) =>
 
 export const createComment = expressAsyncHandler(async (req, res) =>
 { 
+
   const { postId } = req.params;
   const { content } = req.body;
   const { userId } = getAuth(req);
+
 
   if (!postId || !content.trim() === '')
   {
@@ -42,16 +44,16 @@ export const createComment = expressAsyncHandler(async (req, res) =>
   try {
     await session.withTransaction(async () => {
       const createdComments = await Comment.create([
-        { post: postId, user: userId, content }
+        { post: postId, user: user._id, content }
       ], { session });
       comment = createdComments[0];
 
       await post.updateOne({ $push: { comments: comment._id } }, { session });
 
-      if (post.user.toString() !== userId.toString()) {
+      if (post.user.toString() !== user._id.toString()) {
         await Notification.create([
           {
-            from: userId,
+            from: user._id,
             to: post.user,
             post: postId,
             comment: comment._id,
@@ -61,7 +63,9 @@ export const createComment = expressAsyncHandler(async (req, res) =>
       }
     });
     res.status(201).json({ comment });
-  } catch (error) {
+  } catch (error)
+  {
+
     await session.abortTransaction();
     throw error;
   } finally {
@@ -82,7 +86,7 @@ export const deleteComment = expressAsyncHandler(async (req, res) =>
     return res.status(404).json({ message: 'Comment or user not found' });
   }
 
-  if (comment.user.toString() !== userId)
+  if (comment.user.toString() !== user._id.toString())
   {
     return res.status(403).json({ message: 'You are not authorized to delete this comment' });
   }
@@ -94,7 +98,7 @@ export const deleteComment = expressAsyncHandler(async (req, res) =>
 
       await Post.updateOne({ $pull: { comments: commentId } }, { session });
 
-      if (comment.user.toString() !== userId) {
+      if (comment.user.toString() !== user._id.toString()) {
         await Notification.deleteMany({ comment: commentId }, { session });
       }
     });

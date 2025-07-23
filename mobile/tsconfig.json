@@ -3,8 +3,10 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@/*": ["./*"]
-    }
+      "@/*": ["./*"],
+      "@env": ["./node_modules/react-native-dotenv"]
+    },
+    "typeRoots": ["./node_modules/@types", "./@types"]
   },
   "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts", "nativewind-env.d.ts"]
 }
