@@ -6,6 +6,25 @@ This is a monorepo for the X-Clone application, containing the mobile client and
 
 To get started with the project, clone the repository and install the dependencies for each workspace.
 
+### Project Structure: Monorepo and Workspaces
+
+This project is a monorepo that contains two primary workspaces:
+
+- `backend/`: The Node.js server application.
+- `mobile/`: The React Native mobile application.
+
+Each workspace has its own `package.json` file with its own dependencies and scripts. The root `package.json` contains development dependencies and scripts that are relevant to the entire project (like `husky` and `lint-staged`).
+
+**Running Scripts in a Workspace**
+
+To run a script defined in a workspace's `package.json` from the project root, you must use the `--prefix` flag.
+
+For example, to run the `test` script defined in `mobile/package.json`, you would run the following command from the root directory:
+
+```bash
+npm run test --prefix mobile
+```
+
 ### Mobile
 
 ```bash
@@ -51,3 +70,44 @@ This project uses [Husky](https://typicode.github.io/husky/) and [lint-staged](h
 - **How it works:** Before a commit is finalized, `lint-staged` runs Prettier on all the files you've changed. This ensures that no un-formatted code ever makes it into the repository.
 - **Setup:** This is enabled automatically! After you run `npm install` in the project root, the `prepare` script sets up the Git hooks for you.
 - **Bypassing (for emergencies only):** If you ever need to make a commit without running the pre-commit checks, you can use the `--no-verify` flag: `git commit -m "My message" --no-verify`. This should be used sparingly.
+
+### How Pre-Commit Formatting Works
+
+This monorepo uses a sophisticated `lint-staged` setup to ensure that each workspace (`mobile`, `backend`) and the project root are formatted independently using their own specific configurations. This prevents conflicts and keeps dependencies isolated.
+
+Here's a breakdown of the process that happens when you run `git commit`:
+
+```mermaid
+graph TD
+    subgraph "Pre-Commit Process"
+        A[1. User runs 'git commit'] --> B[2. Husky intercepts the commit];
+        B --> C{3. Husky triggers lint-staged};
+        C --> D{4. lint-staged checks<br/>paths of changed files};
+    end
+
+    subgraph "For files in 'mobile/'"
+        D -- "e.g., mobile/components/Button.tsx" --> E["npm run format --prefix mobile"];
+        E --> F["Runs Prettier installed in 'mobile'"];
+        F --> G["Uses 'mobile/.prettierrc'<br/>and the Tailwind CSS plugin"];
+    end
+
+    subgraph "For files in 'backend/'"
+        D -- "e.g., backend/routes/users.js" --> H["npm run format --prefix backend"];
+        H --> I["Runs Prettier installed in 'backend'"];
+    end
+
+    subgraph "For files in Project Root"
+        D -- "e.g., README.md" --> J["prettier --write"];
+        J --> K["Runs Prettier installed in the root"];
+        K --> L["<b>Key Point:</b><br/>Prettier reads the root '.prettierignore'"];
+        L --> M["<b>IGNORING</b> everything inside<br/>'mobile/' and 'backend/'"];
+        M --> N["Formats only root files<br/>without seeing other configs"];
+    end
+
+    style L fill:#d4edda,stroke:#155724,stroke-width:2px
+    style M fill:#f8d7da,stroke:#721c24,stroke-width:2px
+```
+
+#### Key Takeaway
+
+The crucial part of this setup is the root `.prettierignore` file. By explicitly ignoring the `mobile/` and `backend/` directories, we ensure that the root Prettier process _only_ handles root-level files. This prevents it from trying to load configurations or plugins from the individual workspaces, thus avoiding dependency conflicts.

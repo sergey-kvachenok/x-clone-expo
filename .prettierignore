@@ -1,7 +1,9 @@
 # Dependencies
 node_modules/
-backend/node_modules/
-mobile/node_modules/
+
+# Workspaces
+backend/
+mobile/
 
 # Build outputs
 .expo/
@@ -80,4 +82,4 @@ Thumbs.db
 *.jsbundle
 
 # CocoaPods
-ios/Pods/ 
+ios/Pods/

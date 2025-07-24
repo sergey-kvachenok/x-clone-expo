@@ -1,0 +1,15 @@
+{
+  "folders": [
+    {
+      "name": "Mobile",
+      "path": "mobile",
+    },
+    {
+      "name": "Backend",
+      "path": "backend",
+    },
+  ],
+  "settings": {
+    // Global settings for the entire workspace can go here
+  },
+}

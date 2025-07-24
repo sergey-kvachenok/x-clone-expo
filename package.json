@@ -16,6 +16,9 @@
     ],
     "mobile/**/*.{js,jsx,ts,tsx,json,md}": [
       "npm run format --prefix mobile"
+    ],
+    "*.{js,json,md,mdx,html,css}": [
+      "prettier --write"
     ]
   },
   "devDependencies": {
