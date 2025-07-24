@@ -1,6 +1,6 @@
-import { useComments } from '@/hooks/useComments'
-import { useCurrentUser } from '@/hooks/useCurrentUser'
-import { Post } from '@/types'
+import { useComments } from "@/hooks/useComments";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { Post } from "@/types";
 import {
   View,
   Text,
@@ -10,24 +10,29 @@ import {
   Image,
   TextInput,
   ActivityIndicator,
-} from 'react-native'
+} from "react-native";
 
 interface CommentsModalProps {
-  selectedPost: Post
-  onClose: () => void
+  selectedPost: Post;
+  onClose: () => void;
 }
 
 const CommentsModal = ({ selectedPost, onClose }: CommentsModalProps) => {
-  const { commentText, setCommentText, createComment, isCreatingComment } = useComments()
-  const { currentUser } = useCurrentUser()
+  const { commentText, setCommentText, createComment, isCreatingComment } =
+    useComments();
+  const { currentUser } = useCurrentUser();
 
   const handleClose = () => {
-    onClose()
-    setCommentText('')
-  }
+    onClose();
+    setCommentText("");
+  };
 
   return (
-    <Modal visible={!!selectedPost} animationType="slide" presentationStyle="pageSheet">
+    <Modal
+      visible={!!selectedPost}
+      animationType="slide"
+      presentationStyle="pageSheet"
+    >
       {/* MODAL HEADER */}
       <View className="flex-row items-center justify-between border-b border-gray-100 px-4 py-3">
         <TouchableOpacity onPress={handleClose}>
@@ -52,7 +57,9 @@ const CommentsModal = ({ selectedPost, onClose }: CommentsModalProps) => {
                   <Text className="mr-1 font-bold text-gray-900">
                     {selectedPost.user.firstName} {selectedPost.user.lastName}
                   </Text>
-                  <Text className="ml-1 text-gray-500">@{selectedPost.user.username}</Text>
+                  <Text className="ml-1 text-gray-500">
+                    @{selectedPost.user.username}
+                  </Text>
                 </View>
 
                 {selectedPost.content && (
@@ -73,28 +80,40 @@ const CommentsModal = ({ selectedPost, onClose }: CommentsModalProps) => {
           </View>
 
           {/* COMMENTS LIST */}
-          {(selectedPost.comments ?? []).map(comment => {
-            const { _id, user, content } = comment || {}
-            const { profilePicture, firstName = '', lastName = '', username } = user || {}
-            const fullName = `${firstName} ${lastName}`
+          {(selectedPost.comments ?? []).map((comment) => {
+            const { _id, user, content } = comment || {};
+            const {
+              profilePicture,
+              firstName = "",
+              lastName = "",
+              username,
+            } = user || {};
+            const fullName = `${firstName} ${lastName}`;
             return (
               <View key={_id} className="border-b border-gray-100 bg-white p-4">
                 <View className="flex-row">
-                  <Image source={{ uri: profilePicture }} className="mr-3 h-10 w-10 rounded-full" />
+                  <Image
+                    source={{ uri: profilePicture }}
+                    className="mr-3 h-10 w-10 rounded-full"
+                  />
 
                   <View className="flex-1">
                     <View className="mb-1 flex-row items-center gap-2">
                       {fullName.trim() && (
-                        <Text className="mr-1 font-bold text-gray-900">{fullName}</Text>
+                        <Text className="mr-1 font-bold text-gray-900">
+                          {fullName}
+                        </Text>
                       )}
                       <Text className="text-sm text-gray-500">@{username}</Text>
                     </View>
 
-                    <Text className="text-base leading-5 text-gray-900">{content}</Text>
+                    <Text className="text-base leading-5 text-gray-900">
+                      {content}
+                    </Text>
                   </View>
                 </View>
               </View>
-            )
+            );
           })}
         </ScrollView>
       )}
@@ -120,16 +139,16 @@ const CommentsModal = ({ selectedPost, onClose }: CommentsModalProps) => {
 
             <TouchableOpacity
               className={`self-end rounded-lg px-4 py-2 ${
-                commentText.trim() ? 'bg-blue-500' : 'bg-gray-300'
+                commentText.trim() ? "bg-blue-500" : "bg-gray-300"
               }`}
               onPress={() => createComment(selectedPost._id)}
               disabled={isCreatingComment || !commentText.trim()}
             >
               {isCreatingComment ? (
-                <ActivityIndicator size={'small'} color={'white'} />
+                <ActivityIndicator size={"small"} color={"white"} />
               ) : (
                 <Text
-                  className={`font-semibold ${commentText.trim() ? 'text-white' : 'text-gray-500'}`}
+                  className={`font-semibold ${commentText.trim() ? "text-white" : "text-gray-500"}`}
                 >
                   Reply
                 </Text>
@@ -139,7 +158,7 @@ const CommentsModal = ({ selectedPost, onClose }: CommentsModalProps) => {
         </View>
       </View>
     </Modal>
-  )
-}
+  );
+};
 
-export default CommentsModal
+export default CommentsModal;

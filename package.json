@@ -1,0 +1,26 @@
+{
+  "name": "x-clone",
+  "version": "1.0.0",
+  "description": "This is a monorepo for the X-Clone application, containing the mobile client and the backend server.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "lint-staged": {
+    "backend/**/*.{js,json,md}": [
+      "npm run format --prefix backend"
+    ],
+    "mobile/**/*.{js,jsx,ts,tsx,json,md}": [
+      "npm run format --prefix mobile"
+    ]
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "prettier": "^3.6.2"
+  }
+}

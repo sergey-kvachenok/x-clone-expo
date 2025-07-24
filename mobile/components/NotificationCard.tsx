@@ -1,51 +1,58 @@
-import { Notification } from '@/types'
-import { formatDate } from '@/utils/formatters'
-import { Feather } from '@expo/vector-icons'
-import { View, Text, Alert, Image, TouchableOpacity } from 'react-native'
+import { Notification } from "@/types";
+import { formatDate } from "@/utils/formatters";
+import { Feather } from "@expo/vector-icons";
+import { View, Text, Alert, Image, TouchableOpacity } from "react-native";
 
 interface NotificationCardProps {
-  notification: Notification
-  onDelete: (notificationId: string) => void
+  notification: Notification;
+  onDelete: (notificationId: string) => void;
 }
 
-const NotificationCard = ({ notification, onDelete }: NotificationCardProps) => {
+const NotificationCard = ({
+  notification,
+  onDelete,
+}: NotificationCardProps) => {
   const getNotificationText = () => {
-    const name = `${notification.from.firstName} ${notification.from.lastName}`
+    const name = `${notification.from.firstName} ${notification.from.lastName}`;
     switch (notification.type) {
-      case 'like':
-        return `${name} liked your post`
-      case 'comment':
-        return `${name} commented on your post`
-      case 'follow':
-        return `${name} started following you`
+      case "like":
+        return `${name} liked your post`;
+      case "comment":
+        return `${name} commented on your post`;
+      case "follow":
+        return `${name} started following you`;
       default:
-        return ''
+        return "";
     }
-  }
+  };
 
   const getNotificationIcon = () => {
     switch (notification.type) {
-      case 'like':
-        return <Feather name="heart" size={20} color="#E0245E" />
-      case 'comment':
-        return <Feather name="message-circle" size={20} color="#1DA1F2" />
-      case 'follow':
-        return <Feather name="user-plus" size={20} color="#17BF63" />
+      case "like":
+        return <Feather name="heart" size={20} color="#E0245E" />;
+      case "comment":
+        return <Feather name="message-circle" size={20} color="#1DA1F2" />;
+      case "follow":
+        return <Feather name="user-plus" size={20} color="#17BF63" />;
       default:
-        return <Feather name="bell" size={20} color="#657786" />
+        return <Feather name="bell" size={20} color="#657786" />;
     }
-  }
+  };
 
   const handleDelete = () => {
-    Alert.alert('Delete Notification', 'Are you sure you want to delete this notification?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => onDelete(notification._id),
-      },
-    ])
-  }
+    Alert.alert(
+      "Delete Notification",
+      "Are you sure you want to delete this notification?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => onDelete(notification._id),
+        },
+      ],
+    );
+  };
 
   return (
     <View className="border-b border-gray-100 bg-white">
@@ -68,9 +75,14 @@ const NotificationCard = ({ notification, onDelete }: NotificationCardProps) => 
                 <Text className="font-semibold">
                   {notification.from.firstName} {notification.from.lastName}
                 </Text>
-                <Text className="text-gray-500"> @{notification.from.username}</Text>
+                <Text className="text-gray-500">
+                  {" "}
+                  @{notification.from.username}
+                </Text>
               </Text>
-              <Text className="mb-2 text-sm text-gray-700">{getNotificationText()}</Text>
+              <Text className="mb-2 text-sm text-gray-700">
+                {getNotificationText()}
+              </Text>
             </View>
 
             <TouchableOpacity className="ml-2 p-1" onPress={handleDelete}>
@@ -102,10 +114,12 @@ const NotificationCard = ({ notification, onDelete }: NotificationCardProps) => 
             </View>
           )}
 
-          <Text className="text-xs text-gray-400">{formatDate(notification.createdAt)}</Text>
+          <Text className="text-xs text-gray-400">
+            {formatDate(notification.createdAt)}
+          </Text>
         </View>
       </View>
     </View>
-  )
-}
-export default NotificationCard
+  );
+};
+export default NotificationCard;

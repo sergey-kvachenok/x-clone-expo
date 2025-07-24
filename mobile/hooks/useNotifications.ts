@@ -1,9 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useApiClient } from '../utils/api'
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useApiClient } from "../utils/api";
 
 export const useNotifications = () => {
-  const api = useApiClient()
-      const queryClient = useQueryClient()
+  const api = useApiClient();
+  const queryClient = useQueryClient();
 
   const {
     data: notificationsData,
@@ -12,19 +12,21 @@ export const useNotifications = () => {
     refetch,
     isRefetching,
   } = useQuery({
-    queryKey: ['notifications'],
-    queryFn: () => api.get('/notifications'),
-    select: res => res.data.notifications,
-  })
+    queryKey: ["notifications"],
+    queryFn: () => api.get("/notifications"),
+    select: (res) => res.data.notifications,
+  });
 
   const deleteNotificationMutation = useMutation({
-    mutationFn: (notificationId: string) => api.delete(`/notifications/${notificationId}`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications'] }),
-  })
+    mutationFn: (notificationId: string) =>
+      api.delete(`/notifications/${notificationId}`),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["notifications"] }),
+  });
 
   const deleteNotification = (notificationId: string) => {
-    deleteNotificationMutation.mutate(notificationId)
-  }
+    deleteNotificationMutation.mutate(notificationId);
+  };
 
   return {
     notifications: notificationsData || [],
@@ -34,5 +36,5 @@ export const useNotifications = () => {
     isRefetching,
     deleteNotification,
     isDeletingNotification: deleteNotificationMutation.isPending,
-  }
-}
+  };
+};

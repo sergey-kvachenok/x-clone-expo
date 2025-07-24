@@ -1,17 +1,22 @@
-import { Feather } from '@expo/vector-icons'
-import { Text, View } from 'react-native'
+import { Feather } from "@expo/vector-icons";
+import { Text, View } from "react-native";
 
 const NoNotificationsFound = () => {
   return (
-    <View className="flex-1 items-center justify-center px-8" style={{ minHeight: 400 }}>
+    <View
+      className="flex-1 items-center justify-center px-8"
+      style={{ minHeight: 400 }}
+    >
       <View className="items-center">
         <Feather name="bell" size={80} color="#E1E8ED" />
-        <Text className="mb-3 mt-6 text-2xl font-semibold text-gray-500">No notifications yet</Text>
+        <Text className="mb-3 mt-6 text-2xl font-semibold text-gray-500">
+          No notifications yet
+        </Text>
         <Text className="max-w-xs text-center text-base leading-6 text-gray-400">
           When people like, comment, or follow you, you&apos;ll see it here.
         </Text>
       </View>
     </View>
-  )
-}
-export default NoNotificationsFound
+  );
+};
+export default NoNotificationsFound;

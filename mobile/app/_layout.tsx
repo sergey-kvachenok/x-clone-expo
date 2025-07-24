@@ -1,47 +1,47 @@
-import { Stack, SplashScreen } from 'expo-router'
-import '../global.css'
-import React, { useEffect } from 'react'
-import { ClerkProvider, useAuth } from '@clerk/clerk-expo'
-import * as SecureStore from 'expo-secure-store'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { StatusBar } from 'expo-status-bar'
+import { Stack, SplashScreen } from "expo-router";
+import "../global.css";
+import React, { useEffect } from "react";
+import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
+import * as SecureStore from "expo-secure-store";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { StatusBar } from "expo-status-bar";
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient();
 
-SplashScreen.preventAutoHideAsync()
+SplashScreen.preventAutoHideAsync();
 
 const tokenCache = {
   async getToken(key: string) {
     try {
-      return SecureStore.getItemAsync(key)
+      return SecureStore.getItemAsync(key);
     } catch (err) {
-      return null
+      return null;
     }
   },
   async saveToken(key: string, value: string) {
     try {
-      return SecureStore.setItemAsync(key, value)
+      return SecureStore.setItemAsync(key, value);
     } catch (err) {
-      return
+      return;
     }
   },
-}
+};
 
 function RootLayoutNav() {
-  const { isLoaded } = useAuth()
+  const { isLoaded } = useAuth();
 
   useEffect(() => {
     if (isLoaded) {
-      SplashScreen.hideAsync()
+      SplashScreen.hideAsync();
     }
-  }, [isLoaded])
+  }, [isLoaded]);
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(tabs)" />
     </Stack>
-  )
+  );
 }
 
 export default function RootLayout() {
@@ -57,5 +57,5 @@ export default function RootLayout() {
       </ClerkProvider>
       <StatusBar style="auto" />
     </>
-  )
+  );
 }

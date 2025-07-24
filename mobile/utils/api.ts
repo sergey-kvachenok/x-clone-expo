@@ -1,51 +1,54 @@
-import { useAuth } from '@clerk/clerk-expo'
-import axios, { AxiosInstance } from 'axios'
-import { useMemo } from 'react'
+import { useAuth } from "@clerk/clerk-expo";
+import axios, { AxiosInstance } from "axios";
+import { useMemo } from "react";
 
 export const useApiClient = (): AxiosInstance => {
-  const { getToken } = useAuth()
+  const { getToken } = useAuth();
 
   const api = useMemo(() => {
     const axiosInstance = axios.create({
       baseURL: process.env.EXPO_PUBLIC_API_URL,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-    })
+    });
 
-    axiosInstance.interceptors.request.use(async config => {
+    axiosInstance.interceptors.request.use(async (config) => {
       try {
-        const token = await getToken()
+        const token = await getToken();
         if (token) {
-          config.headers.Authorization = `Bearer ${token}`
+          config.headers.Authorization = `Bearer ${token}`;
         }
       } catch (error) {
-        console.error('Error getting auth token:', error)
+        console.error("Error getting auth token:", error);
       }
-      return config
-    })
+      return config;
+    });
 
-    return axiosInstance
-  }, [getToken])
+    return axiosInstance;
+  }, [getToken]);
 
-  return api
-}
+  return api;
+};
 
 export const userApi = {
-  syncUser: (api: AxiosInstance) => api.post('/users/sync'),
-  getCurrentUser: (api: AxiosInstance) => api.get('/users/me'),
-  updateProfile: (api: AxiosInstance, userData: any) => api.put('/users/profile', userData),
-}
+  syncUser: (api: AxiosInstance) => api.post("/users/sync"),
+  getCurrentUser: (api: AxiosInstance) => api.get("/users/me"),
+  updateProfile: (api: AxiosInstance, userData: any) =>
+    api.put("/users/profile", userData),
+};
 
 export const postApi = {
-  getPosts: (api: AxiosInstance) => api.get('/posts'),
+  getPosts: (api: AxiosInstance) => api.get("/posts"),
   createPost: (api: AxiosInstance, content: string, image?: string) =>
-    api.post('/posts', { content, image }),
-  likePost: (api: AxiosInstance, postId: string) => api.post(`/posts/${postId}/like`),
-  deletePost: (api: AxiosInstance, postId: string) => api.delete(`/posts/${postId}`),
-}
+    api.post("/posts", { content, image }),
+  likePost: (api: AxiosInstance, postId: string) =>
+    api.post(`/posts/${postId}/like`),
+  deletePost: (api: AxiosInstance, postId: string) =>
+    api.delete(`/posts/${postId}`),
+};
 
 export const commentApi = {
   createComment: (api: AxiosInstance, postId: string, content: string) =>
     api.post(`/comments/post/${postId}`, { content }),
-}
+};
