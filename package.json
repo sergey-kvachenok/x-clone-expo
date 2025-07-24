@@ -1,8 +1,13 @@
 {
   "name": "x-clone",
+  "private": true,
   "version": "1.0.0",
   "description": "This is a monorepo for the X-Clone application, containing the mobile client and the backend server.",
   "main": "index.js",
+  "workspaces": [
+    "backend",
+    "mobile"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "husky"
@@ -12,10 +17,10 @@
   "license": "ISC",
   "lint-staged": {
     "backend/**/*.{js,json,md}": [
-      "npm run format --prefix backend"
+      "npm run format -w backend"
     ],
     "mobile/**/*.{js,jsx,ts,tsx,json,md}": [
-      "npm run format --prefix mobile"
+      "npm run format -w mobile"
     ],
     "*.{js,json,md,mdx,html,css}": [
       "prettier --write"

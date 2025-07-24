@@ -17,26 +17,25 @@ Each workspace has its own `package.json` file with its own dependencies and scr
 
 **Running Scripts in a Workspace**
 
-To run a script defined in a workspace's `package.json` from the project root, you must use the `--prefix` flag.
+To run a script defined in a workspace's `package.json` from the project root, you must use the `-w` (or `--workspace`) flag.
 
 For example, to run the `test` script defined in `mobile/package.json`, you would run the following command from the root directory:
 
 ```bash
-npm run test --prefix mobile
+npm run test -w mobile
 ```
 
 ### Mobile
 
 ```bash
-cd mobile
+# To install dependencies for all workspaces, just run this in the root:
 npm install
 ```
 
 ### Backend
 
 ```bash
-cd backend
-npm install
+# Dependencies for all workspaces are installed via a single `npm install` in the root.
 ```
 
 ## Code Formatting
@@ -110,4 +109,4 @@ graph TD
 
 #### Key Takeaway
 
-The crucial part of this setup is the root `.prettierignore` file. By explicitly ignoring the `mobile/` and `backend/` directories, we ensure that the root Prettier process _only_ handles root-level files. This prevents it from trying to load configurations or plugins from the individual workspaces, thus avoiding dependency conflicts.
+The crucial part of this setup is the root `.prettierignore` file. By explicitly ignoring the `mobile/`
