@@ -3,7 +3,7 @@ import { useApiClient } from '../utils/api'
 
 export const useNotifications = () => {
   const api = useApiClient()
-  const queryClient = useQueryClient()
+      const queryClient = useQueryClient()
 
   const {
     data: notificationsData,

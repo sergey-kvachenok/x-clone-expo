@@ -1,11 +1,14 @@
 # Dependencies
 node_modules/
+backend/node_modules/
+mobile/node_modules/
 
 # Build outputs
 .expo/
 dist/
 web-build/
 build/
+backend/dist/
 
 # Environment files
 .env
