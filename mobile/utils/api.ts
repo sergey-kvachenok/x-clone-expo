@@ -6,8 +6,11 @@ export const useApiClient = (): AxiosInstance => {
   const { getToken } = useAuth();
 
   const api = useMemo(() => {
+    const baseURL = process.env.EXPO_PUBLIC_API_URL;
+    console.log("API Base URL:", baseURL); // <--- For debugging
+
     const axiosInstance = axios.create({
-      baseURL: process.env.EXPO_PUBLIC_API_URL,
+      baseURL: baseURL,
       headers: {
         "Content-Type": "application/json",
       },
@@ -40,6 +43,8 @@ export const userApi = {
 
 export const postApi = {
   getPosts: (api: AxiosInstance) => api.get("/posts"),
+  getUserPosts: (api: AxiosInstance, username: string) =>
+    api.get(`/posts/user/${username}`),
   createPost: (api: AxiosInstance, content: string, image?: string) =>
     api.post("/posts", { content, image }),
   likePost: (api: AxiosInstance, postId: string) =>

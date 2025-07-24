@@ -5,32 +5,80 @@ import {
   TouchableOpacity,
   FlatList,
   RefreshControl,
+  Alert,
+  ScrollView,
 } from "react-native";
-import React, { useMemo, useState } from "react";
+import React, { FC, useMemo, useState } from "react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { usePosts } from "@/hooks/usePosts";
 import PostCard from "./PostCard";
 import { Post } from "@/types";
 import CommentsModal from "./CommentsModal";
+import * as Haptics from "expo-haptics";
 
-const PostsList = () => {
+interface IPostsList {
+  isVirtualized?: boolean;
+}
+
+const PostsList: FC<IPostsList> = ({ isVirtualized = false }) => {
   const { currentUser } = useCurrentUser();
   const {
     posts,
     isLoading,
-    error,
-    refetch,
-    toggleLike,
-    deletePost,
-    checkIsLiked,
     isRefetching,
-  } = usePosts(currentUser);
+    refetch,
+    likePost,
+    deletePost,
+    currentUserId,
+    error,
+  } = usePosts(currentUser?.username);
 
   const [selectedPostId, setSelectedPostId] = useState<string>("");
 
   const selectedPost = useMemo(() => {
     return posts.find((post: Post) => post._id === selectedPostId);
   }, [selectedPostId, posts]);
+
+  const listComponent = useMemo(() => {
+    if (isVirtualized) {
+      return (
+        <FlatList
+          data={posts}
+          keyExtractor={(item) => item._id}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <PostCard
+              post={item}
+              onLike={handleLike}
+              onDelete={handleDelete}
+              onComment={handleComment}
+              isLiked={item.likes.includes(currentUserId as string)}
+              currentUser={currentUser}
+            />
+          )}
+          refreshControl={
+            <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+          }
+        />
+      );
+    }
+
+    return (
+      <ScrollView>
+        {posts.map((post) => (
+          <PostCard
+            key={post._id}
+            post={post}
+            onLike={handleLike}
+            onDelete={handleDelete}
+            onComment={handleComment}
+            isLiked={post.likes.includes(currentUserId as string)}
+            currentUser={currentUser}
+          />
+        ))}
+      </ScrollView>
+    );
+  }, [posts]);
 
   if (isLoading) {
     return (
@@ -73,40 +121,42 @@ const PostsList = () => {
     );
   }
 
-  const renderItem = ({ item }: { item: Post }) => (
-    <PostCard
-      post={item}
-      onLike={toggleLike}
-      onDelete={deletePost}
-      onComment={(post: Post) => setSelectedPostId(post._id)}
-      currentUser={currentUser}
-      isLiked={checkIsLiked(item.likes, currentUser)}
-    />
-  );
+  const handleLike = (postId: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    likePost(postId);
+  };
+
+  const handleDelete = (postId: string) => {
+    Alert.alert("Delete Post", "Are you sure you want to delete this post?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Delete",
+        onPress: () => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          deletePost(postId);
+        },
+        style: "destructive",
+      },
+    ]);
+  };
+
+  const handleComment = (post: Post) => {
+    setSelectedPostId(post._id);
+  };
 
   return (
-    <>
-      <FlatList
-        data={posts}
-        renderItem={renderItem}
-        keyExtractor={(item) => item._id}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefetching}
-            onRefresh={refetch}
-            tintColor={"#1DA1F2"}
-          />
-        }
-      />
-
+    <View>
+      {listComponent}
       {selectedPost && (
         <CommentsModal
           selectedPost={selectedPost}
           onClose={() => setSelectedPostId("")}
         />
       )}
-    </>
+    </View>
   );
 };
 

@@ -1,21 +1,31 @@
-import { postApi, useApiClient } from "@/utils/api";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Post, User, ApiResponse, PostsResponse } from "@/types";
-import { togglePostLike } from "@/utils/cacheUtils";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@clerk/clerk-expo";
+import { postApi } from "@/utils/api";
+import { useApiClient } from "@/utils/api";
+import { Post, PostsResponse } from "@/types";
+import {
+  optimisticDeletePost,
+  optimisticUpdatePost,
+  togglePostLike,
+} from "@/utils/cacheUtils";
+import { AxiosResponse } from "axios";
 
-export const usePosts = (currentUser?: User) => {
+export const usePosts = (username?: string) => {
+  const { userId: currentUserId } = useAuth();
   const api = useApiClient();
   const queryClient = useQueryClient();
+  const queryKey = username ? ["userPosts", username] : ["posts"];
 
   const {
-    data: postsData,
+    data: posts,
     isLoading,
     error,
     refetch,
     isRefetching,
   } = useQuery({
-    queryKey: ["posts"],
-    queryFn: () => postApi.getPosts(api),
+    queryKey,
+    queryFn: () =>
+      username ? postApi.getUserPosts(api, username) : postApi.getPosts(api),
     select: (response) => response.data.posts,
   });
 
@@ -23,167 +33,115 @@ export const usePosts = (currentUser?: User) => {
     unknown,
     Error,
     string,
-    { previousResponse?: ApiResponse<PostsResponse> }
+    {
+      previousPostsResponse?: AxiosResponse<PostsResponse>;
+      previousUserPostsResponse?: AxiosResponse<PostsResponse>;
+    }
   >({
     mutationFn: (postId: string) => postApi.likePost(api, postId),
 
-    // Optimistic update
     onMutate: async (postId: string) => {
-      if (!currentUser) {
-        return;
+      if (!currentUserId) return {};
+
+      const previousPostsResponse = await optimisticUpdatePost(
+        queryClient,
+        ["posts"],
+        postId,
+        (post) => togglePostLike(post, currentUserId),
+      );
+
+      let previousUserPostsResponse;
+      if (username) {
+        previousUserPostsResponse = await optimisticUpdatePost(
+          queryClient,
+          ["userPosts", username],
+          postId,
+          (post) => togglePostLike(post, currentUserId),
+        );
       }
 
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ["posts"] });
-
-      // Snapshot the previous value - it's the full Axios response
-      const previousResponse = queryClient.getQueryData<
-        ApiResponse<PostsResponse>
-      >(["posts"]);
-
-      // Optimistically update (can't use utility due to different data structure)
-      queryClient.setQueryData<ApiResponse<PostsResponse>>(
-        ["posts"],
-        (oldResponse) => {
-          if (!oldResponse?.data?.posts) return oldResponse;
-
-          const updatedPosts = oldResponse.data.posts.map((post: Post) =>
-            post._id === postId ? togglePostLike(post, currentUser._id) : post,
-          );
-
-          return {
-            ...oldResponse,
-            data: {
-              ...oldResponse.data,
-              posts: updatedPosts,
-            },
-          };
-        },
-      );
-
-      // Return a context object with the snapshotted value
-      return { previousResponse };
+      return {
+        previousPostsResponse: previousPostsResponse?.previousResponse,
+        previousUserPostsResponse: previousUserPostsResponse?.previousResponse,
+      };
     },
 
-    onError: (err: Error, postId: string, context) => {
-      console.log({ error });
-      if (context?.previousResponse) {
-        queryClient.setQueryData(["posts"], context.previousResponse);
-      }
-    },
-
-    onSuccess: (data: unknown, postId: string) => {
-      // Success - data is already optimistically updated
-    },
-
-    // Always refetch after completion to ensure consistency
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
-    },
-  });
-
-  const deletePostMutation = useMutation<
-    unknown,
-    Error,
-    string,
-    {
-      previousPostsResponse?: ApiResponse<PostsResponse>;
-      previousUserPostsResponse?: ApiResponse<PostsResponse>;
-    }
-  >({
-    mutationFn: (postId: string) => postApi.deletePost(api, postId),
-
-    // Optimistic update for delete
-    onMutate: async (postId: string) => {
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ["posts"] });
-      await queryClient.cancelQueries({ queryKey: ["userPosts"] });
-
-      // Snapshot the previous values
-      const previousPostsResponse = queryClient.getQueryData<
-        ApiResponse<PostsResponse>
-      >(["posts"]);
-      const previousUserPostsResponse = queryClient.getQueryData<
-        ApiResponse<PostsResponse>
-      >(["userPosts"]);
-
-      // Optimistically remove the post from both caches
-      queryClient.setQueryData<ApiResponse<PostsResponse>>(
-        ["posts"],
-        (oldResponse) => {
-          if (!oldResponse?.data?.posts) return oldResponse;
-
-          return {
-            ...oldResponse,
-            data: {
-              ...oldResponse.data,
-              posts: oldResponse.data.posts.filter(
-                (post: Post) => post._id !== postId,
-              ),
-            },
-          };
-        },
-      );
-
-      // Also update userPosts cache if it exists
-      queryClient.setQueryData<ApiResponse<PostsResponse>>(
-        ["userPosts"],
-        (oldResponse) => {
-          if (!oldResponse?.data?.posts) return oldResponse;
-
-          return {
-            ...oldResponse,
-            data: {
-              ...oldResponse.data,
-              posts: oldResponse.data.posts.filter(
-                (post: Post) => post._id !== postId,
-              ),
-            },
-          };
-        },
-      );
-
-      return { previousPostsResponse, previousUserPostsResponse };
-    },
-
-    onError: (err: Error, postId: string, context) => {
-      // Rollback on error
+    onError: (err, postId, context) => {
+      console.error("Error liking post:", err);
       if (context?.previousPostsResponse) {
         queryClient.setQueryData(["posts"], context.previousPostsResponse);
       }
-      if (context?.previousUserPostsResponse) {
+      if (context?.previousUserPostsResponse && username) {
         queryClient.setQueryData(
-          ["userPosts"],
+          ["userPosts", username],
           context.previousUserPostsResponse,
         );
       }
     },
 
-    onSuccess: () => {
-      // No need to invalidate - optimistic update is already applied
-      // Only refetch if we want to ensure data consistency (optional)
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["userPosts"] });
     },
   });
 
-  const checkIsLiked = (
-    postLikes: string[],
-    currentUser: User | undefined,
-  ): boolean => {
-    return Boolean(currentUser && postLikes.includes(currentUser._id));
-  };
+  const { mutate: deletePostMutation } = useMutation<
+    unknown,
+    Error,
+    string,
+    {
+      previousPostsResponse?: AxiosResponse<PostsResponse>;
+      previousUserPostsResponse?: AxiosResponse<PostsResponse>;
+    }
+  >({
+    mutationFn: (postId: string) => postApi.deletePost(api, postId),
 
-  const toggleLike = (postId: string): void => {
-    likePostMutation(postId);
-  };
+    onMutate: async (postId: string) => {
+      const previousPostsResponse = await optimisticDeletePost(
+        queryClient,
+        ["posts"],
+        postId,
+      );
+
+      let previousUserPostsResponse;
+      if (username) {
+        previousUserPostsResponse = await optimisticDeletePost(
+          queryClient,
+          ["userPosts", username],
+          postId,
+        );
+      }
+      return {
+        previousPostsResponse: previousPostsResponse?.previousResponse,
+        previousUserPostsResponse: previousUserPostsResponse?.previousResponse,
+      };
+    },
+    onError: (err, postId, context) => {
+      console.error("Error deleting post:", err);
+      if (context?.previousPostsResponse) {
+        queryClient.setQueryData(["posts"], context.previousPostsResponse);
+      }
+      if (context?.previousUserPostsResponse && username) {
+        queryClient.setQueryData(
+          ["userPosts", username],
+          context.previousUserPostsResponse,
+        );
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["userPosts"] });
+    },
+  });
 
   return {
-    posts: postsData || [],
+    posts: (posts || []) as Post[],
     isLoading,
     isRefetching,
-    error,
     refetch,
-    toggleLike,
-    deletePost: (postId: string) => deletePostMutation.mutate(postId),
-    checkIsLiked,
+    likePost: likePostMutation,
+    deletePost: deletePostMutation,
+    currentUserId,
+    error,
   };
 };

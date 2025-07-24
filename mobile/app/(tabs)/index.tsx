@@ -15,7 +15,9 @@ export default function Home() {
       </View>
 
       <PostComposer />
-      <PostsList />
+      <View style={{ paddingBottom: 160 }}>
+        <PostsList isVirtualized={true} />
+      </View>
     </SafeAreaView>
   );
 }

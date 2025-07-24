@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Alert } from "react-native";
 import { useApiClient, commentApi } from "../utils/api";
 import {
-  updatePostsCache,
+  optimisticUpdatePost,
   addOptimisticComment,
   replaceOptimisticComment,
 } from "../utils/cacheUtils";
@@ -56,11 +56,15 @@ export const useComments = () => {
       { postId }: CreateCommentParams,
     ) => {
       setCommentText("");
+      // Invalidate both post queries to ensure data consistency everywhere
       queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["userPosts"] });
 
-      updatePostsCache(queryClient, postId, (post) => {
-        return replaceOptimisticComment(post, realComment.comment);
-      });
+      // Manually update the cache to replace the optimistic comment with the real one.
+      // This avoids a UI flicker while the queries refetch.
+      optimisticUpdatePost(queryClient, ["posts"], postId, (post) =>
+        replaceOptimisticComment(post, realComment.comment),
+      );
     },
 
     onError: (error: Error, { postId }: CreateCommentParams, context) => {
