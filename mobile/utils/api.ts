@@ -7,7 +7,6 @@ export const useApiClient = (): AxiosInstance => {
 
   const api = useMemo(() => {
     const baseURL = process.env.EXPO_PUBLIC_API_URL;
-    console.log({ baseURL });
 
     const axiosInstance = axios.create({
       baseURL: baseURL,
@@ -38,7 +37,7 @@ export const userApi = {
   syncUser: (api: AxiosInstance) => api.post("/users/sync"),
   getCurrentUser: (api: AxiosInstance) => api.get("/users/me"),
   updateProfile: (api: AxiosInstance, userData: any) =>
-    api.put("/users/profile", userData),
+    api.patch("/users/profile", userData),
 };
 
 export const postApi = {
