@@ -33,6 +33,8 @@ const PostsList: FC<IPostsList> = ({ isVirtualized = false }) => {
     error,
   } = usePosts(currentUser?.username);
 
+  console.log({ error });
+
   const [selectedPostId, setSelectedPostId] = useState<string>("");
 
   const selectedPost = useMemo(() => {

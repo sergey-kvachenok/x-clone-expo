@@ -7,6 +7,7 @@ export const useApiClient = (): AxiosInstance => {
 
   const api = useMemo(() => {
     const baseURL = process.env.EXPO_PUBLIC_API_URL;
+    console.log({ baseURL });
 
     const axiosInstance = axios.create({
       baseURL: baseURL,

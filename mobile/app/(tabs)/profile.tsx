@@ -22,6 +22,7 @@ import {
 
 const ProfileScreens = () => {
   const { currentUser, isLoading } = useCurrentUser();
+  console.log({ currentUser });
   const insets = useSafeAreaInsets();
 
   const {

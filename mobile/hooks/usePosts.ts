@@ -16,6 +16,8 @@ export const usePosts = (username?: string) => {
   const queryClient = useQueryClient();
   const queryKey = username ? ["userPosts", username] : ["posts"];
 
+  console.log({ currentUserId });
+
   const {
     data: posts,
     isLoading,
@@ -28,6 +30,8 @@ export const usePosts = (username?: string) => {
       username ? postApi.getUserPosts(api, username) : postApi.getPosts(api),
     select: (response) => response.data.posts,
   });
+
+  console.log({ posts });
 
   const { mutate: likePostMutation } = useMutation<
     unknown,

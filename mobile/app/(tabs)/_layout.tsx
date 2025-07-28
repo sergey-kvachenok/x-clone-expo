@@ -21,12 +21,12 @@ const CustomHeader: FC<ICustomHeader> = ({ title }) => {
 
 const TabsLayout = () => {
   const insets = useSafeAreaInsets();
-  const { isSignedIn } = useAuth();
-
+  const { isSignedIn, isLoaded } = useAuth();
+  console.log("isSignedIn TabsLayout", { isSignedIn, isLoaded });
   if (!isSignedIn) {
     return <Redirect href="/(auth)" />;
   }
-
+  console.log("isSignedIn TabsLayout 2");
   return (
     <Tabs
       screenOptions={{
